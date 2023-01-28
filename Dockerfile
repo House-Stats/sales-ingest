@@ -3,7 +3,7 @@ FROM python:3.9.7
 WORKDIR /app
 
 COPY ./ingester .
-COPY ./requiremnts.txt .
+COPY ./requirements.txt .
 
 
 RUN python3 -m pip install --upgrade pip setuptools wheel
