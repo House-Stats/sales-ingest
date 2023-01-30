@@ -4,7 +4,7 @@ import sentry_sdk
 
 if __name__ == "__main__":
     sentry_sdk.init(
-        dsn="https://429d564121d14b3fa3ef61eba553f8b6@sentry.housestats.co.uk/1",
+        dsn="https://afd79a357e174a3aa35ba89c3d4d4611@sentry.housestats.co.uk/2",
 
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
