@@ -1,12 +1,14 @@
 import os
 import re
+import socket
+from datetime import datetime
 from pickle import loads
 from typing import List
 
-from confluent_kafka import Consumer
 from asyncpg import connect
-from datetime import datetime
-from typing import List
+from confluent_kafka import Consumer
+from dotenv import load_dotenv
+
 
 class Ingest():
     def __init__(self, test=False) -> None:
@@ -23,6 +25,7 @@ class Ingest():
 
     def _load_env(self):
         # Loads the enviroment variables
+        load_dotenv()
         self._DB = os.environ.get("DBNAME", "house_data")
         self._USERNAME = os.environ.get("POSTGRES_USER")
         self._PASSWORD = os.environ.get("POSTGRES_PASSWORD")
@@ -45,6 +48,14 @@ class Ingest():
         except IndexError:
             return ["","",""]
 
+    async def _set_status(self, status: str) -> None:
+        consumer_id = socket.gethostname()
+        try:
+            await self._conn.execute("INSERT INTO settings (name, data) VALUES ($1, $2);", consumer_id, status)
+        except:
+            await self._conn.execute("DELETE FROM settings WHERE name = $1", consumer_id)
+            await self._conn.execute("INSERT INTO settings (name, data) VALUES ($1, $2);", consumer_id, status)
+
     async def _insert_areas(self, sale: List, postcode_parts: List[str]):
         areas = [sale[3], sale[9], sale[11], sale[12], sale[13],
                  postcode_parts[0], postcode_parts[1], postcode_parts[2]] # Extracts areas values from sale
@@ -60,7 +71,9 @@ class Ingest():
         await self._connect_db()
         self._consumer.subscribe(["new_sales"])
         while True:
+            await self._set_status("WAITING")
             msg = self._consumer.poll(1.0)  # Fetches the latest message from kafka
+            await self._set_status("PROCESSING")
             if msg is None:  #Checks the message isnt empty
                 continue
             if msg.error():  # Checks there are no errors
