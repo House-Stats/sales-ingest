@@ -56,6 +56,11 @@ class Ingest():
             await self._conn.execute("DELETE FROM settings WHERE name = $1", consumer_id)
             await self._conn.execute("INSERT INTO settings (name, data) VALUES ($1, $2);", consumer_id, status)
 
+    async def remove_status(self):
+        consumer_id = socket.gethostname()
+        print("DELETING")
+        await self._conn.execute("DELETE FROM settings WHERE name = $1", consumer_id)
+
     async def _insert_areas(self, sale: List, postcode_parts: List[str]):
         areas = [sale[3], sale[9], sale[11], sale[12], sale[13],
                  postcode_parts[0], postcode_parts[1], postcode_parts[2]] # Extracts areas values from sale
@@ -107,9 +112,6 @@ class Ingest():
                 await self._conn.execute("INSERT INTO sales (tui, price, date, new, freehold, ppd_cat, houseID) \
                             VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (tui) DO NOTHING;", 
                             sale[0], int(sale[1]), date, new, freehold, sale[14], houseID) # Insert into sales table
-
-    def __del__(self):
-        self._conn.execute("DELETE FROM settings WHERE name = $1", consumer_id)
 
 
 if __name__ == "__main__":

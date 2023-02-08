@@ -11,5 +11,8 @@ if __name__ == "__main__":
         # We recommend adjusting this value in production.
         traces_sample_rate=1.0
     )
-    ingester = Ingest()
-    asyncio.run(ingester.main_loop())
+    try:
+        ingester = Ingest()
+        asyncio.run(ingester.main_loop())
+    finally:
+        asyncio.run(ingester.remove_status())
