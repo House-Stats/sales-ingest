@@ -1,5 +1,6 @@
 import os
 import re
+import socket
 from datetime import datetime
 from pickle import loads
 from typing import List
@@ -48,7 +49,7 @@ class Ingest():
             return ["","",""]
 
     async def _set_status(self, status: str) -> None:
-        consumer_id = os.environ["HOSTNAME"]
+        consumer_id = socket.gethostname()
         try:
             await self._conn.execute("INSERT INTO settings (name, data) VALUES ($1, $2);", consumer_id, status)
         except:
