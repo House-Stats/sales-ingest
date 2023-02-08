@@ -108,6 +108,10 @@ class Ingest():
                             VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (tui) DO NOTHING;", 
                             sale[0], int(sale[1]), date, new, freehold, sale[14], houseID) # Insert into sales table
 
+    def __del__(self):
+        self._conn.execute("DELETE FROM settings WHERE name = $1", consumer_id)
+
+
 if __name__ == "__main__":
     import asyncio
     x = Ingest()
