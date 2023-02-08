@@ -1,5 +1,7 @@
 from ingest import Ingest
 import asyncio
+import atexit
+
 import sentry_sdk
 
 if __name__ == "__main__":
@@ -11,8 +13,7 @@ if __name__ == "__main__":
         # We recommend adjusting this value in production.
         traces_sample_rate=1.0
     )
-    try:
-        ingester = Ingest()
-        asyncio.run(ingester.main_loop())
-    finally:
-        asyncio.run(ingester.remove_status())
+
+    ingester = Ingest()
+    atexit.register(asyncio.run, ingester.remove_status())
+    asyncio.run(ingester.main_loop())
