@@ -5,14 +5,10 @@ import atexit
 import sentry_sdk
 
 if __name__ == "__main__":
-    # sentry_sdk.init(
-    #     dsn="https://afd79a357e174a3aa35ba89c3d4d4611@sentry.housestats.co.uk/2",
-
-    #     # Set traces_sample_rate to 1.0 to capture 100%
-    #     # of transactions for performance monitoring.
-    #     # We recommend adjusting this value in production.
-    #     traces_sample_rate=1.0
-    # )
+    sentry_sdk.init(
+        dsn="https://aadfc763299c4541b15f33e414c395d4@o4504585220980736.ingest.sentry.io/4504649935945728",
+        traces_sample_rate=1.0
+    )
 
     ingester = Ingest()
     atexit.register(asyncio.run, ingester.remove_status())
