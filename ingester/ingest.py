@@ -26,11 +26,29 @@ class Ingest():
     def _load_env(self):
         # Loads the enviroment variables
         load_dotenv()
-        self._DB = os.environ.get("DBNAME", "house_data")
-        self._USERNAME = os.environ.get("POSTGRES_USER")
-        self._PASSWORD = os.environ.get("POSTGRES_PASSWORD")
-        self._HOST = os.environ.get("POSTGRES_HOST")
-        self._KAFKA = os.environ.get("KAFKA")
+        self._DB = self.manage_sensitive("DBNAME", "house_data")
+        self._USERNAME = self.manage_sensitive("POSTGRES_USER")
+        self._PASSWORD = self.manage_sensitive("POSTGRES_PASSWORD")
+        self._HOST = self.manage_sensitive("POSTGRES_HOST")
+        self._KAFKA = self.manage_sensitive("KAFKA")
+
+    def manage_sensitive(self, name, default= None):
+        v1 = os.environ.get(name)
+
+        secret_fpath = f'/run/secrets/{name}'
+        existence = os.path.exists(secret_fpath)
+
+        if v1 is not None:
+            return v1
+
+        if existence:
+            v2 = open(secret_fpath).read().rstrip('\n')
+            return v2
+
+        if all([v1 is None, not existence]) and default is None:
+            raise KeyError(f'{name} environment variable is not defined')
+        elif default is not None:
+            return default
 
     async def _connect_db(self):
         self._conn = await connect(f"postgresql://{self._USERNAME}:{self._PASSWORD}@{self._HOST}/{self._DB}")
